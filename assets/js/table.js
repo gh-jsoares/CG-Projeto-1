@@ -5,7 +5,7 @@ export default class Table {
     constructor(x, y, z) {
         this.obj = new THREE.Object3D()
         this.material = new THREE.MeshBasicMaterial({
-            color: 0x11CC22,
+            color: 0x1122CC,
             wireframe: true
         })
 
