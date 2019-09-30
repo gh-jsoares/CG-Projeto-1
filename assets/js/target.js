@@ -24,10 +24,10 @@ export default class Target {
     }
 
     addCylinder(root) {
-        let geometry = new THREE.CylinderGeometry(2, 2, 20, 32)
+        let geometry = new THREE.CylinderGeometry(2, 2, 14, 32)
         let mesh = new THREE.Mesh(geometry, this.material)
 
-        mesh.position.y = 10
+        mesh.position.y = 7
 
         root.add(mesh)
         
@@ -35,10 +35,11 @@ export default class Target {
     }
 
     addToroid(root) {
-        let geometry = new THREE.TorusGeometry(5, 1.5, 8, 15)
+        let geometry = new THREE.TorusGeometry(2, 0.7, 8, 15)
         let mesh = new THREE.Mesh(geometry, this.material)
 
-        mesh.position.y = 15
+        mesh.position.y = 9.7
+        mesh.rotation.y = Math.PI/2
 
         root.add(mesh)
     }

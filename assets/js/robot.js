@@ -191,10 +191,10 @@ export default class Robot {
     addFingers(root) {
         let fingers = new THREE.Object3D()
 
-        this.addFinger(fingers, -2)
-        this.addFinger(fingers, 2)
+        this.addFinger(fingers, -2.25)
+        this.addFinger(fingers, 2.25)
 
-        fingers.position.y = 1.5
+        fingers.position.y = 2
 
         root.add(fingers)
     }
