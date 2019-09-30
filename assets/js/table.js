@@ -9,11 +9,11 @@ export default class Table {
             wireframe: true
         })
 
-        this.addTableTop(x, y, z)
-        this.addTableLeg(x - 25, y - 1, z - 8)
-        this.addTableLeg(x - 25, y - 1, z + 8)
-        this.addTableLeg(x + 25, y - 1, z + 8)
-        this.addTableLeg(x + 25, y - 1, z - 8)
+        this.addTop(x, y, z)
+        this.addLeg(x - 25, y - 1, z - 8)
+        this.addLeg(x - 25, y - 1, z + 8)
+        this.addLeg(x + 25, y - 1, z + 8)
+        this.addLeg(x + 25, y - 1, z - 8)
 
         this.obj.position.set(x, y, z)
     }
@@ -26,7 +26,7 @@ export default class Table {
         scene.remove(this.obj)
     }
 
-    addTableTop(x, y, z) {
+    addTop(x, y, z) {
         let geometry = new THREE.CubeGeometry(60, 2, 20)
         let mesh = new THREE.Mesh(geometry, this.material)
         mesh.position.set(x, y, z)
@@ -34,7 +34,7 @@ export default class Table {
         this.obj.add(mesh)
     }
 
-    addTableLeg(x, y, z) {
+    addLeg(x, y, z) {
         let geometry = new THREE.CubeGeometry(2, 6, 2)
         let mesh = new THREE.Mesh(geometry, this.material)
         mesh.position.set(x, y - 3, z)

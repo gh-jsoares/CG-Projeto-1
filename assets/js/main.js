@@ -1,12 +1,12 @@
 'use strict'
 
-import Table from './table.js'
-import Ball from './ball.js'
+import Robot from './robot.js'
+import Camera from './camera.js'
 
-const FOV = 70
+const FOV = 50
 const ASPECT = window.innerWidth / window.innerHeight
-const NEAR = 1
-const FAR = 1000
+const NEAR = -100
+const FAR = 100
 
 let camera, scene, renderer
 
@@ -25,11 +25,20 @@ function init(shouldAnimate) {
         animate()
 }
 
+let multiplier = 1
+let x = 0
+
 function animate() {
-    ball.animate()
+    let val = multiplier * 0.01
+    x += val
+    if(x > 1)
+        multiplier = -1
+    else if(x < -1)
+        multiplier = 1
+
+    robot.rotateArm(val, val)
 
     render()
-
     requestAnimationFrame(animate)
 }
 
@@ -41,18 +50,15 @@ function createScene() {
     scene = new THREE.Scene()
     scene.add(new THREE.AxesHelper(10))
 
-    window.table = new Table(0, 0, 0)
-    window.ball = new Ball(0, 0, 15)
+    window.robot = new Robot(0, 0, 0)
 
-    table.addToScene(scene)
-    ball.addToScene(scene)
+    robot.addToScene(scene)
 }
 
 function createCamera() {
-    camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR)
-    camera.position.x = 50
-    camera.position.y = 50
-    camera.position.z = 50
+    //camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR)
+    camera = new THREE.OrthographicCamera(-ASPECT * FOV / 2, ASPECT * FOV / 2, FOV / 2, -FOV / 2, NEAR, FAR)
+    camera.position.y = 0
     camera.lookAt(scene.position)
 }
 
