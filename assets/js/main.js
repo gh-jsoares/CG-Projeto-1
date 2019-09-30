@@ -5,12 +5,7 @@ import CameraManager from './camera.js'
 import Target from './target.js'
 import SceneManager from './SceneManager.js'
 
-const ASPECT = window.innerWidth / window.innerHeight
-const NEAR = -100
-const FAR = 100
-const FRUSTUM_SIZE = 70
-
-let cameraManager, renderer
+let cameraManager, renderer, sceneManager
 
 function init(shouldAnimate) {
     renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -18,7 +13,7 @@ function init(shouldAnimate) {
 
     document.body.appendChild(renderer.domElement)
 
-    window.sceneManager = new SceneManager()
+    sceneManager = new SceneManager()
     cameraManager = new CameraManager(sceneManager.getScene(), renderer)
 
     sceneManager.addObject('target', new Target(25, 0, 0))
@@ -28,9 +23,14 @@ function init(shouldAnimate) {
         animate()
 }
 
-function animate() {
-    sceneManager.getObject('robot').animate()
-
+let prevTimestamp = 0
+function animate(timestamp) {
+    if(timestamp) {
+        let deltaTime = (timestamp - prevTimestamp) / 10
+        sceneManager.animate(deltaTime)
+        prevTimestamp = timestamp
+    }
+    
     render()
     requestAnimationFrame(animate)
 }

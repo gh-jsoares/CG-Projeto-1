@@ -67,10 +67,10 @@ export default class Robot {
         })
     }
     
-    animate() {
-        this.rotateArm(this.obj.userData.arm.x, this.obj.userData.arm.z)
-        this.rotateRobot(this.obj.userData.rotate)
-        this.moveRobot(this.obj.userData.move)
+    animate(deltaTime) {
+        this.rotateArm(this.obj.userData.arm.x * deltaTime, this.obj.userData.arm.z * deltaTime)
+        this.rotateRobot(this.obj.userData.rotate * deltaTime)
+        this.moveRobot(this.obj.userData.move * deltaTime)
     }
 
     addToScene(scene) {

@@ -12,13 +12,17 @@ export default class SceneManager {
 
     registerEvents() {
         window.addEventListener('keydown', (e) => {
-            if (e.keyCode == 52)
-            this.scene.traverse((node) => {
-                if(node instanceof THREE.Mesh) {
-                    node.material.wireframe = !node.material.wireframe
-                }
-            })
+            if (e.keyCode == 52) {
+                this.objects.forEach((obj) => {
+                    obj.object.material.wireframe = !obj.object.material.wireframe
+                })
+            }
         })
+    }
+
+    animate(deltaTime) {
+        if(this.getObject('robot'))
+            this.getObject('robot').animate(deltaTime)
     }
 
     addObject(name, object) {
@@ -36,7 +40,8 @@ export default class SceneManager {
     }
 
     getObject(name) {
-        return this.objects.find((obj) => obj.name == name).object
+        let result = this.objects.find((obj) => obj.name == name)
+        return result ? result.object : undefined
     }
 
     getScene() {
