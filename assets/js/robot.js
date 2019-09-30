@@ -4,16 +4,75 @@ export default class Robot {
 
     constructor(x, y, z) {
         this.obj = new THREE.Object3D()
+        this.obj.userData = {
+            arm: {
+                x: 0,
+                z: 0
+            },
+            rotate: 0,
+            move: 0
+        }
         this.material = new THREE.MeshBasicMaterial({
-            color: 0xE5F7F,
+            color: 0x3F3FFF,
             wireframe: false
         })
 
-        let base = this.createBase(this.obj, x, y + 1, z)
+        let base = this.createBase(this.obj)
         this.addWheels(base)
         this.arm = this.addArm(base)
+        
+        this.obj.position.set(x, y, z)
+        this.registerEvents()
+    }
+
+    registerEvents() {
+        window.addEventListener('keydown', (e) => {
+            // Arm Rotations
+            if(e.keyCode == 81 || e.keyCode == 113) // q or Q
+                this.obj.userData.arm.z = 0.01
+                
+            if(e.keyCode == 87 || e.keyCode == 117) // w or W
+                this.obj.userData.arm.z = -0.01
+
+            if(e.keyCode == 65 || e.keyCode == 97) // a or A
+                this.obj.userData.arm.x = 0.01
+
+            if(e.keyCode == 83 || e.keyCode == 115) // s or S
+                this.obj.userData.arm.x = -0.01
+
+            // Robot Movement
+            if(e.keyCode == 37) // <-
+                this.obj.userData.rotate = 0.01
+            if(e.keyCode == 39) // ->
+                this.obj.userData.rotate = -0.01
+            if(e.keyCode == 38) // ^
+                this.obj.userData.move = 0.1
+            if(e.keyCode == 40) // v
+                this.obj.userData.move = -0.1
+        })
+        window.addEventListener('keyup', (e) => {
+            // Arm Rotations
+            if(e.keyCode == 81 || e.keyCode == 113 || e.keyCode == 87 || e.keyCode == 117) // q or Q or w or W
+                this.obj.userData.arm.z = 0
+
+            if(e.keyCode == 65 || e.keyCode == 97 || e.keyCode == 83 || e.keyCode == 115) // a or A or s or S
+                this.obj.userData.arm.x = 0
+
+            // Robot Movement
+            if(e.keyCode == 37 || e.keyCode == 39) // <- or ->
+                this.obj.userData.rotate = 0
+
+            if(e.keyCode == 38 || e.keyCode == 40) // ^ or  v
+                this.obj.userData.move = 0
+        })
     }
     
+    animate() {
+        this.rotateArm(this.obj.userData.arm.x, this.obj.userData.arm.z)
+        this.rotateRobot(this.obj.userData.rotate)
+        this.moveRobot(this.obj.userData.move)
+    }
+
     addToScene(scene) {
         scene.add(this.obj)
     }
@@ -23,21 +82,23 @@ export default class Robot {
     }
 
     rotateArm(x, z) {
-        this.arm.rotation.x += x
-        this.arm.rotation.z += z
+        this.arm.rotation.x = Math.min(Math.max(parseFloat(this.arm.rotation.x + x), -1.3), 1.3)
+        this.arm.rotation.z = Math.min(Math.max(parseFloat(this.arm.rotation.z + z), -1.3), 1.3)
     }
 
-    move(x, y, z) {
-        this.obj.position.x += x
-        this.obj.position.y += y
-        this.obj.position.z += z
+    rotateRobot(rad) {
+        this.obj.rotation.y += rad
+    }
+
+    moveRobot(distance) {
+        this.obj.translateX(distance)
     }
 
     createBase(root, x, y, z) {
         let geometry = new THREE.BoxGeometry(10, 2, 10)
         let mesh = new THREE.Mesh(geometry, this.material)
 
-        mesh.position.set(x, y, z)
+        mesh.position.y = 2
 
         root.add(mesh)
 
