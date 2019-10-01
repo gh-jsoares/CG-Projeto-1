@@ -1,8 +1,8 @@
 'use strict'
 
-import Robot from './robot.js'
-import CameraManager from './camera.js'
-import Target from './target.js'
+import Robot from './Robot.js'
+import CameraManager from './CameraManager.js'
+import Target from './Target.js'
 import SceneManager from './SceneManager.js'
 
 let cameraManager, renderer, sceneManager

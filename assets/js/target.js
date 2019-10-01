@@ -4,10 +4,16 @@ export default class Target {
 
     constructor(x, y, z) {
         this.obj = new THREE.Object3D()
-        this.material = new THREE.MeshBasicMaterial({
-            color: 0xFF3F3F,
-            wireframe: false
-        })
+        this.materials = {
+            body: new THREE.MeshBasicMaterial({
+                color: 0xCF9923,
+                wireframe: false
+            }),
+            toroid: new THREE.MeshBasicMaterial({
+                color: 0xCFC023,
+                wireframe: false
+            }),
+        }
 
         let cylinder = this.addCylinder(this.obj)
         this.addToroid(cylinder)
@@ -25,7 +31,7 @@ export default class Target {
 
     addCylinder(root) {
         let geometry = new THREE.CylinderGeometry(2, 2, 14, 32)
-        let mesh = new THREE.Mesh(geometry, this.material)
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
 
         mesh.position.y = 7
 
@@ -36,7 +42,7 @@ export default class Target {
 
     addToroid(root) {
         let geometry = new THREE.TorusGeometry(2, 0.7, 8, 15)
-        let mesh = new THREE.Mesh(geometry, this.material)
+        let mesh = new THREE.Mesh(geometry, this.materials.toroid)
 
         mesh.position.y = 9.7
         mesh.rotation.y = Math.PI/2

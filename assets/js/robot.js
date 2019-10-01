@@ -6,20 +6,31 @@ export default class Robot {
         this.obj = new THREE.Object3D()
         this.obj.userData = {
             arm: {
-                x: 0,
+                y: 0,
                 z: 0
             },
             rotate: 0,
             move: 0
         }
-        this.material = new THREE.MeshBasicMaterial({
-            color: 0x3F3FFF,
-            wireframe: false
-        })
+        this.materials = {
+            body: new THREE.MeshBasicMaterial({
+                color: 0xCFCFCF,
+                wireframe: false
+            }),
+            wheels: new THREE.MeshBasicMaterial({
+                color: 0x364E70,
+                wireframe: false
+            }),
+            joints: new THREE.MeshBasicMaterial({
+                color: 0xC7263E,
+                wireframe: false
+            }),
+        }
 
         let base = this.createBase(this.obj)
         this.addWheels(base)
-        this.arm = this.addArm(base)
+        let ballCap = this.createBallCap(base)
+        this.arm = this.addArm(ballCap)
         
         this.obj.position.set(x, y, z)
         this.registerEvents()
@@ -35,10 +46,10 @@ export default class Robot {
                 this.obj.userData.arm.z = -0.01
 
             if(e.keyCode == 65 || e.keyCode == 97) // a or A
-                this.obj.userData.arm.x = 0.01
+                this.obj.userData.arm.y = 0.01
 
             if(e.keyCode == 83 || e.keyCode == 115) // s or S
-                this.obj.userData.arm.x = -0.01
+                this.obj.userData.arm.y = -0.01
 
             // Robot Movement
             if(e.keyCode == 37) // <-
@@ -56,7 +67,7 @@ export default class Robot {
                 this.obj.userData.arm.z = 0
 
             if(e.keyCode == 65 || e.keyCode == 97 || e.keyCode == 83 || e.keyCode == 115) // a or A or s or S
-                this.obj.userData.arm.x = 0
+                this.obj.userData.arm.y = 0
 
             // Robot Movement
             if(e.keyCode == 37 || e.keyCode == 39) // <- or ->
@@ -68,7 +79,7 @@ export default class Robot {
     }
     
     animate(deltaTime) {
-        this.rotateArm(this.obj.userData.arm.x * deltaTime, this.obj.userData.arm.z * deltaTime)
+        this.rotateArm(this.obj.userData.arm.y * deltaTime, this.obj.userData.arm.z * deltaTime)
         this.rotateRobot(this.obj.userData.rotate * deltaTime)
         this.moveRobot(this.obj.userData.move * deltaTime)
     }
@@ -81,8 +92,8 @@ export default class Robot {
         scene.remove(this.obj)
     }
 
-    rotateArm(x, z) {
-        this.arm.rotation.x = Math.min(Math.max(parseFloat(this.arm.rotation.x + x), -1.3), 1.3)
+    rotateArm(y, z) {
+        this.arm.rotation.y += y
         this.arm.rotation.z = Math.min(Math.max(parseFloat(this.arm.rotation.z + z), -1.3), 1.3)
     }
 
@@ -94,9 +105,9 @@ export default class Robot {
         this.obj.translateX(distance)
     }
 
-    createBase(root, x, y, z) {
+    createBase(root) {
         let geometry = new THREE.BoxGeometry(10, 2, 10)
-        let mesh = new THREE.Mesh(geometry, this.material)
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
 
         mesh.position.y = 2
 
@@ -107,7 +118,7 @@ export default class Robot {
 
     createArm(root, y) {
         let geometry = new THREE.BoxGeometry(1, 10, 2)
-        let mesh = new THREE.Mesh(geometry, this.material)
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
 
         mesh.position.y = y
 
@@ -116,9 +127,13 @@ export default class Robot {
         return mesh
     }
 
-    createJoint(root, radius, y) {
+    createJoint(root, radius, y, half) {
         let geometry = new THREE.SphereGeometry(radius, 8, 8)
-        let mesh = new THREE.Mesh(geometry, this.material)
+
+        if (half) // create calute (half sphere)
+            geometry = new THREE.SphereGeometry(radius, 8, 8, 0, 2 * Math.PI, 0, 0.5 * Math.PI)
+        
+        let mesh = new THREE.Mesh(geometry, this.materials.joints)
         
         mesh.position.y = y
 
@@ -139,16 +154,18 @@ export default class Robot {
         base.add(wheels)
     }
 
+    createBallCap(root) {
+        let joint = this.createJoint(root, 2, 1, true) // Parent of arm
+        return joint
+    }
+
     addArm(root) {
         let arm = new THREE.Object3D() // Arm Group
-        let joint = this.createJoint(arm, 2, 0) // Parent of arm
 
-        let arm_mesh = this.createArm(joint, 7) // Parent of Forearm group
+        let arm_mesh = this.createArm(arm, 6) // Parent of Forearm group
         this.addForearm(arm_mesh)
         
         arm.position.y = 1
-
-        arm.add(joint)
         root.add(arm)
         
         return arm
@@ -181,7 +198,7 @@ export default class Robot {
 
     addFinger(root, x) {
         let geometry = new THREE.BoxGeometry(0.5, 3, 2)
-        let mesh = new THREE.Mesh(geometry, this.material)
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
 
         mesh.position.x = x
         
@@ -201,8 +218,8 @@ export default class Robot {
 
     addHand(root) {
         let geometry = new THREE.BoxGeometry(5, 1.5, 2)
-        let mesh = new THREE.Mesh(geometry, this.material)
-        mesh.position.y = 1
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
+        mesh.position.y = 1.75
 
         this.addFingers(mesh)
 
@@ -211,7 +228,7 @@ export default class Robot {
 
     addWheel(root, x, z) {
         let geometry = new THREE.SphereGeometry(1, 8, 8)
-        let mesh = new THREE.Mesh(geometry, this.material)
+        let mesh = new THREE.Mesh(geometry, this.materials.wheels)
 
         mesh.position.x = x
         mesh.position.z = z

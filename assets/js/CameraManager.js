@@ -39,8 +39,8 @@ export default class CameraManager {
     }
 
     switchView(view) {
-        this.camera.position.x = view == 2 ? 50 : 0
-        this.camera.position.y = view == 3 ? 50 : 0
+        this.camera.position.x = view == 3 ? 50 : 0
+        this.camera.position.y = view == 1 ? 50 : 0
 
         this.camera.lookAt(0, 0, 0)
     }

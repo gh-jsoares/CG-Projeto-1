@@ -14,7 +14,7 @@ export default class SceneManager {
         window.addEventListener('keydown', (e) => {
             if (e.keyCode == 52) {
                 this.objects.forEach((obj) => {
-                    obj.object.material.wireframe = !obj.object.material.wireframe
+                    Object.values(obj.object.materials).forEach((mat) => mat.wireframe = !mat.wireframe)
                 })
             }
         })
