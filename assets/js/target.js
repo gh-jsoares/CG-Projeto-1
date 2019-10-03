@@ -15,8 +15,8 @@ export default class Target {
             }),
         }
 
-        let cylinder = this.addCylinder(this.obj)
-        this.addToroid(cylinder)
+        this.addCylinder(this.obj)
+        this.addToroid(this.obj, 14, 2, 0.7)
 
         this.obj.position.set(x, y, z)
     }
@@ -40,11 +40,11 @@ export default class Target {
         return mesh
     }
 
-    addToroid(root) {
-        let geometry = new THREE.TorusGeometry(2, 0.7, 8, 15)
+    addToroid(root, y, out_radius, in_radius) {
+        let geometry = new THREE.TorusGeometry(out_radius, in_radius, 8, 15)
         let mesh = new THREE.Mesh(geometry, this.materials.toroid)
 
-        mesh.position.y = 9.7
+        mesh.position.y = y + out_radius + in_radius
         mesh.rotation.y = Math.PI/2
 
         root.add(mesh)

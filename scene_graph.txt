@@ -1,22 +1,25 @@
 SCENE
 	- Robot
-		- BASE
+		- Base
+			- BASE
 			- Wheels
 				- WHEEL
 				- WHEEL
 				- WHEEL
 				- WHEEL
-		- JOINT
-			- Arm
+			- JOINT
+		- Arm
+			- ARM
+			- Forearm
+				- JOINT
 				- ARM
-					- Forearm
-						- JOINT
-							- ARM
-								- Wrist
-									- JOINT
-										- HAND
-											- FINGER
-											- FINGER
+				- Wrist
+					- JOINT
+					- Hand
+						- HAND
+						- Fingers
+							- FINGER
+							- FINGER
 	- Target
 		- CYLINDER
-			- TOROID
+		- TOROID

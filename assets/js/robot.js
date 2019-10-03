@@ -29,8 +29,8 @@ export default class Robot {
 
         let base = this.createBase(this.obj)
         this.addWheels(base)
-        let ballCap = this.createBallCap(base)
-        this.arm = this.addArm(ballCap)
+        this.createBallCap(base)
+        this.arm = this.addArm(this.obj, 5)
         
         this.obj.position.set(x, y, z)
         this.registerEvents()
@@ -106,14 +106,17 @@ export default class Robot {
     }
 
     createBase(root) {
+        let base = new THREE.Object3D()
         let geometry = new THREE.BoxGeometry(10, 2, 10)
         let mesh = new THREE.Mesh(geometry, this.materials.body)
 
         mesh.position.y = 2
+        base.position.y = 1
 
-        root.add(mesh)
+        base.add(mesh)
+        root.add(base)
 
-        return mesh
+        return base
     }
 
     createArm(root, y) {
@@ -149,23 +152,21 @@ export default class Robot {
         this.addWheel(wheels, 5, -5)
         this.addWheel(wheels, 5, 5)
 
-        wheels.position.y = -1
 
         base.add(wheels)
     }
 
     createBallCap(root) {
-        let joint = this.createJoint(root, 2, 1, true) // Parent of arm
-        return joint
+        return this.createJoint(root, 2, 3, true)
     }
 
-    addArm(root) {
+    addArm(root, y) {
         let arm = new THREE.Object3D() // Arm Group
 
-        let arm_mesh = this.createArm(arm, 6) // Parent of Forearm group
-        this.addForearm(arm_mesh)
+        this.createArm(arm, 6) // Arm Mesh
+        this.addForearm(arm, 12) // Forearm group
         
-        arm.position.y = 1
+        arm.position.y = y
         root.add(arm)
         
         return arm
@@ -174,25 +175,25 @@ export default class Robot {
     addForearm(root, y) {
         let forearm = new THREE.Object3D() // Forearm Group
         let joint = this.createJoint(forearm, 1, 0) // Parent of arm
-        let arm_mesh = this.createArm(joint, 6) // Parent of Wrist group
+        forearm.add(joint)
+        this.createArm(joint, y / 2) // Parent of Wrist group
 
-        this.addWrist(arm_mesh)
+        this.addWrist(forearm, y)
 
         forearm.rotateZ(-Math.PI / 2)
-        forearm.position.y = 6
+        forearm.position.y = y
 
-        forearm.add(joint)
         root.add(forearm)
     }
 
-    addWrist(root) {
+    addWrist(root, y) {
         let wrist = new THREE.Object3D() // Wrist Group
         let joint = this.createJoint(wrist, 1, 0) // Parent of hand
-        this.addHand(joint)
-
-        wrist.position.y = 6
-
         wrist.add(joint)
+        this.addHand(wrist)
+
+        wrist.position.y = y
+
         root.add(wrist)
     }
 
@@ -217,13 +218,16 @@ export default class Robot {
     }
 
     addHand(root) {
+        let hand = new THREE.Object3D()
         let geometry = new THREE.BoxGeometry(5, 1.5, 2)
         let mesh = new THREE.Mesh(geometry, this.materials.body)
-        mesh.position.y = 1.75
+        hand.add(mesh)
+        
+        this.addFingers(hand)
 
-        this.addFingers(mesh)
-
-        root.add(mesh)
+        hand.position.y = 1.75
+        
+        root.add(hand)
     }
 
     addWheel(root, x, z) {
