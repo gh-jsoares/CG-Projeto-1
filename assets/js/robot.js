@@ -1,7 +1,10 @@
 'use strict'
+const MOVE_SPEED = 0.2
+const ROTATE_SPEED = 0.02
+const ARM_ROTATE_SPEED = 0.02
+
 
 export default class Robot {
-
     constructor(x, y, z) {
         this.obj = new THREE.Object3D()
         this.obj.userData = {
@@ -27,10 +30,8 @@ export default class Robot {
             }),
         }
 
-        let base = this.createBase(this.obj)
-        this.addWheels(base)
-        this.createBallCap(base)
-        this.arm = this.addArm(this.obj, 5)
+        this.createBase(this.obj)
+        this.arm = this.createArm(this.obj)
         
         this.obj.position.set(x, y, z)
         this.registerEvents()
@@ -40,27 +41,28 @@ export default class Robot {
         window.addEventListener('keydown', (e) => {
             // Arm Rotations
             if(e.keyCode == 81 || e.keyCode == 113) // q or Q
-                this.obj.userData.arm.z = 0.01
+                this.obj.userData.arm.z = ARM_ROTATE_SPEED
                 
             if(e.keyCode == 87 || e.keyCode == 117) // w or W
-                this.obj.userData.arm.z = -0.01
+                this.obj.userData.arm.z = -ARM_ROTATE_SPEED
 
             if(e.keyCode == 65 || e.keyCode == 97) // a or A
-                this.obj.userData.arm.y = 0.01
+                this.obj.userData.arm.y = ARM_ROTATE_SPEED
 
             if(e.keyCode == 83 || e.keyCode == 115) // s or S
-                this.obj.userData.arm.y = -0.01
+                this.obj.userData.arm.y = -ARM_ROTATE_SPEED
 
             // Robot Movement
             if(e.keyCode == 37) // <-
-                this.obj.userData.rotate = 0.01
+                this.obj.userData.rotate = ROTATE_SPEED
             if(e.keyCode == 39) // ->
-                this.obj.userData.rotate = -0.01
+                this.obj.userData.rotate = -ROTATE_SPEED
             if(e.keyCode == 38) // ^
-                this.obj.userData.move = 0.1
+                this.obj.userData.move = MOVE_SPEED
             if(e.keyCode == 40) // v
-                this.obj.userData.move = -0.1
+                this.obj.userData.move = -MOVE_SPEED
         })
+
         window.addEventListener('keyup', (e) => {
             // Arm Rotations
             if(e.keyCode == 81 || e.keyCode == 113 || e.keyCode == 87 || e.keyCode == 117) // q or Q or w or W
@@ -105,32 +107,7 @@ export default class Robot {
         this.obj.translateX(distance)
     }
 
-    createBase(root) {
-        let base = new THREE.Object3D()
-        let geometry = new THREE.BoxGeometry(10, 2, 10)
-        let mesh = new THREE.Mesh(geometry, this.materials.body)
-
-        mesh.position.y = 2
-        base.position.y = 1
-
-        base.add(mesh)
-        root.add(base)
-
-        return base
-    }
-
-    createArm(root, y) {
-        let geometry = new THREE.BoxGeometry(1, 10, 2)
-        let mesh = new THREE.Mesh(geometry, this.materials.body)
-
-        mesh.position.y = y
-
-        root.add(mesh)
-
-        return mesh
-    }
-
-    createJoint(root, radius, y, half) {
+    addJoint(root, radius, y, half) {
         let geometry = new THREE.SphereGeometry(radius, 8, 8)
 
         if (half) // create calute (half sphere)
@@ -141,7 +118,24 @@ export default class Robot {
         mesh.position.y = y
 
         root.add(mesh)
-        return mesh
+    }
+
+    createBase(root) {
+        let base = new THREE.Object3D()
+
+        let geometry = new THREE.BoxGeometry(10, 2, 10)
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
+        mesh.position.y = 2
+
+        base.add(mesh)
+
+        this.addWheels(base)
+        this.addBallCap(base)
+
+        base.position.y = 1
+        root.add(base)
+
+        return base
     }
 
     addWheels(base) {
@@ -152,35 +146,53 @@ export default class Robot {
         this.addWheel(wheels, 5, -5)
         this.addWheel(wheels, 5, 5)
 
-
         base.add(wheels)
     }
 
-    createBallCap(root) {
-        return this.createJoint(root, 2, 3, true)
+    addWheel(root, x, z) {
+        let geometry = new THREE.SphereGeometry(1, 8, 8)
+        let mesh = new THREE.Mesh(geometry, this.materials.wheels)
+
+        mesh.position.x = x
+        mesh.position.z = z
+
+        root.add(mesh)
     }
 
-    addArm(root, y) {
+    addBallCap(root) {
+        this.addJoint(root, 2, 3, true)
+    }
+
+    createArm(root) {
         let arm = new THREE.Object3D() // Arm Group
 
-        this.createArm(arm, 6) // Arm Mesh
-        this.addForearm(arm, 12) // Forearm group
+        this.addArm(arm, 6) // Arm Mesh
+        this.addForearm(arm, 12)
         
-        arm.position.y = y
+        arm.position.y = 5
         root.add(arm)
         
         return arm
     }
 
+    addArm(root, y) {
+        let geometry = new THREE.BoxGeometry(1, 10, 2)
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
+
+        mesh.position.y = y
+
+        root.add(mesh)
+
+        return mesh
+    }
+
     addForearm(root, y) {
         let forearm = new THREE.Object3D() // Forearm Group
-        let joint = this.createJoint(forearm, 1, 0) // Parent of arm
-        forearm.add(joint)
-        this.createArm(joint, y / 2) // Parent of Wrist group
-
+        this.addJoint(forearm, 1, 0)
+        this.addArm(forearm, y / 2)
         this.addWrist(forearm, y)
 
-        forearm.rotateZ(-Math.PI / 2)
+        forearm.rotation.z = -Math.PI / 2
         forearm.position.y = y
 
         root.add(forearm)
@@ -188,33 +200,12 @@ export default class Robot {
 
     addWrist(root, y) {
         let wrist = new THREE.Object3D() // Wrist Group
-        let joint = this.createJoint(wrist, 1, 0) // Parent of hand
-        wrist.add(joint)
+        this.addJoint(wrist, 1, 0)
         this.addHand(wrist)
 
         wrist.position.y = y
 
         root.add(wrist)
-    }
-
-    addFinger(root, x) {
-        let geometry = new THREE.BoxGeometry(0.5, 3, 2)
-        let mesh = new THREE.Mesh(geometry, this.materials.body)
-
-        mesh.position.x = x
-        
-        root.add(mesh)
-    }
-
-    addFingers(root) {
-        let fingers = new THREE.Object3D()
-
-        this.addFinger(fingers, -2.25)
-        this.addFinger(fingers, 2.25)
-
-        fingers.position.y = 2
-
-        root.add(fingers)
     }
 
     addHand(root) {
@@ -230,13 +221,23 @@ export default class Robot {
         root.add(hand)
     }
 
-    addWheel(root, x, z) {
-        let geometry = new THREE.SphereGeometry(1, 8, 8)
-        let mesh = new THREE.Mesh(geometry, this.materials.wheels)
+    addFingers(root) {
+        let fingers = new THREE.Object3D()
+
+        this.addFinger(fingers, -2.25)
+        this.addFinger(fingers, 2.25)
+
+        fingers.position.y = 2
+
+        root.add(fingers)
+    }
+
+    addFinger(root, x) {
+        let geometry = new THREE.BoxGeometry(0.5, 3, 2)
+        let mesh = new THREE.Mesh(geometry, this.materials.body)
 
         mesh.position.x = x
-        mesh.position.z = z
-
+        
         root.add(mesh)
     }
 }

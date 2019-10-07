@@ -20,16 +20,14 @@ function init(shouldAnimate) {
     sceneManager.addObject('robot', new Robot(0, 0, 0))
 
     if(shouldAnimate)
-        animate()
+        animate(0)
 }
 
 let prevTimestamp = 0
 function animate(timestamp) {
-    if(timestamp) {
-        let deltaTime = (timestamp - prevTimestamp) / 10
-        sceneManager.animate(deltaTime)
-        prevTimestamp = timestamp
-    }
+    let deltaTime = (timestamp - prevTimestamp) / 10
+    sceneManager.animate(deltaTime)
+    prevTimestamp = timestamp
     
     render()
     requestAnimationFrame(animate)

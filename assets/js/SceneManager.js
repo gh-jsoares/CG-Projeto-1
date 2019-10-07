@@ -5,14 +5,14 @@ export default class SceneManager {
         this.objects = []
 
         this.scene = new THREE.Scene()
-        this.scene.add(new THREE.AxesHelper(10))
+        this.scene.add(new THREE.AxesHelper(30))
 
         this.registerEvents()
     }
 
     registerEvents() {
         window.addEventListener('keydown', (e) => {
-            if (e.keyCode == 52) {
+            if (e.keyCode == 52) { // 4
                 this.objects.forEach((obj) => {
                     Object.values(obj.object.materials).forEach((mat) => mat.wireframe = !mat.wireframe)
                 })
